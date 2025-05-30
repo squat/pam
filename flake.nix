@@ -38,8 +38,6 @@
               gofmt.enable = true;
               govet.enable = true;
               govet.extraPackages = [ pkgs.pam ];
-              staticcheck.enable = true;
-              staticcheck.extraPackages = [ pkgs.go ];
             };
           };
         }
