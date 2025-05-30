@@ -6,7 +6,7 @@ require (
 	github.com/authzed/authzed-go v1.4.0
 	github.com/authzed/grpcutil v0.0.0-20250221190651-1985b19b35b8
 	github.com/samber/lo v1.50.0
-	github.com/squat/pam v0.0.0-20250530021313-0b1dc2cbae66
+	github.com/squat/pam v0.0.0-20250530032452-b36e7bc49c5c
 	google.golang.org/grpc v1.72.2
 )
 
