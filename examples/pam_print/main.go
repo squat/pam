@@ -10,7 +10,10 @@ import (
 	pamc "github.com/squat/pam/c"
 )
 
+var flagSet = flag.NewFlagSet("pam_print", flag.ContinueOnError)
+
 func init() {
+	flagSet.String("output", "text", `The desired output format; one of "text" or "json"`)
 	pamc.Register(new(print))
 }
 
@@ -20,9 +23,7 @@ var _ pam.ServiceModule = (*print)(nil)
 type print struct{}
 
 func (p *print) print(handle pam.Handle, flags int, args []string) {
-	flagSet := flag.NewFlagSet("pam_print", flag.ContinueOnError)
 	var output string
-	flagSet.StringVar(&output, "output", "text", `The desired output format; one of "text" or "json"`)
 	if err := flagSet.Parse(args); err != nil {
 		fmt.Printf("failed to parse arguments: %v", err)
 		return
@@ -106,4 +107,6 @@ func (p *print) ChangeAuthToken(handle pam.Handle, flags int, args []string) err
 	return pam.ErrorIgnore
 }
 
-func main() {}
+func main() {
+	flagSet.Usage()
+}
