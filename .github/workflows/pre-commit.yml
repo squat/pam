@@ -10,5 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/nix-installer-action@v17
+        env:
+          NIX_INSTALLER_EXTRA_CONF: sandbox = false
       - uses: DeterminateSystems/flakehub-cache-action@v2
       - run: nix flake check -L --show-trace
