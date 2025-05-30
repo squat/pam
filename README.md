@@ -12,7 +12,7 @@ This allows you to easily write modules that:
 
 ## Getting Started
 
-Implementing a custom PAM service module requires implementing the [`ServiceModule` interface](/service_module.go) and registering the implementation with the `pamc` package in your main package:
+Building a custom PAM service module requires implementing the [`ServiceModule` interface](/service_module.go) and registering the implementation with the `pamc` package in your main package:
 ```go
 package main
 
@@ -30,4 +30,4 @@ Once implemented, the module can be built with:
 go build -buildmode=c-shared -o pam_go.so
 ```
 
-Take a look at the [examples directory](/examples) for implementation details.
+Take a look at the [examples directory](/examples) for reference implementations.
