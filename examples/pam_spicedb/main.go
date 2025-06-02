@@ -41,11 +41,15 @@ type spicedb struct {
 	lock   sync.Mutex
 }
 
-func (s *spicedb) connect() error {
+func (s *spicedb) connect(args []string) error {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	if s.client != nil {
 		return nil
+	}
+
+	if err := flagSet.Parse(args); err != nil {
+		return fmt.Errorf("failed to parse arguments: %w", err)
 	}
 
 	endpoint := flagSet.Lookup("endpoint").Value.String()
@@ -97,7 +101,7 @@ func (p *spicedb) SetCredentials(handle pam.Handle, flags int, args []string) er
 
 // AccountManagement is checks if the user has the specified relation in SpiceDB.
 func (p *spicedb) AccountManagement(handle pam.Handle, flags int, args []string) error {
-	if err := p.connect(); err != nil {
+	if err := p.connect(args); err != nil {
 		return pam.ErrorService
 	}
 

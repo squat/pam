@@ -3,6 +3,7 @@
 `pam_spicedb.so` is a PAM module that validates a user's account by checking a permission in SpiceDB.
 
 ## Usage
+
 ```
 Usage of pam_spicedb:
   -endpoint string
