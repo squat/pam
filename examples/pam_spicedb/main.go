@@ -54,16 +54,17 @@ func (s *spicedb) connect(args []string) error {
 
 	endpoint := flagSet.Lookup("endpoint").Value.String()
 	tokenFile := flagSet.Lookup("token-file").Value.String()
-	token, err := os.ReadFile(tokenFile)
+	tokenBytes, err := os.ReadFile(tokenFile)
 	if err != nil {
 		return fmt.Errorf("failed to read token file: %w", err)
 	}
 
+	token := strings.TrimSpace(string(tokenBytes))
 	opts := []grpc.DialOption{}
 	tls := flagSet.Lookup("tls").Value.(flag.Getter).Get().(bool)
 	if !tls {
 		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
-		opts = append(opts, grpcutil.WithInsecureBearerToken(string(token)))
+		opts = append(opts, grpcutil.WithInsecureBearerToken(token))
 	} else {
 		verify := lo.Ternary(
 			flagSet.Lookup("insecure-skip-verify").Value.(flag.Getter).Get().(bool),
@@ -77,7 +78,7 @@ func (s *spicedb) connect(args []string) error {
 		}
 
 		opts = append(opts, certsOpt)
-		opts = append(opts, grpcutil.WithBearerToken(string(token)))
+		opts = append(opts, grpcutil.WithBearerToken(token))
 	}
 
 	client, err := authzed.NewClient(endpoint, opts...)
@@ -107,34 +108,40 @@ func (p *spicedb) AccountManagement(handle pam.Handle, flags int, args []string)
 
 	sshAuthInfo := handle.GetEnv("SSH_AUTH_INFO_0")
 	if sshAuthInfo == "" {
-		return pam.ErrorPermissionDenied
+		return pam.ErrorAuth
 	}
-	parts := strings.Split(sshAuthInfo, " ")
-	if len(parts) != 3 {
-		return pam.ErrorPermissionDenied
+	sshAuthInfoLines := strings.Split(sshAuthInfo, "\n")
+	ids := make([]string, 0, len(sshAuthInfoLines))
+	for _, sshAuthInfoLine := range sshAuthInfoLines {
+		parts := strings.Split(sshAuthInfoLine, " ")
+		if len(parts) != 3 {
+			continue
+		}
+		ids = append(ids, parts[2])
 	}
-
-	response, err := p.client.CheckPermission(context.Background(), &v1.CheckPermissionRequest{
-		Consistency: &v1.Consistency{Requirement: &v1.Consistency_FullyConsistent{FullyConsistent: true}},
-		Permission:  flagSet.Lookup("permissin").Value.String(),
-		Resource: &v1.ObjectReference{
-			ObjectId:   flagSet.Lookup("resource-id").Value.String(),
-			ObjectType: flagSet.Lookup("resource-type").Value.String(),
-		},
-		Subject: &v1.SubjectReference{
-			Object: &v1.ObjectReference{
-				ObjectId:   parts[2],
-				ObjectType: flagSet.Lookup("subject-type").Value.String(),
+	for _, id := range ids {
+		response, err := p.client.CheckPermission(context.Background(), &v1.CheckPermissionRequest{
+			Consistency: &v1.Consistency{Requirement: &v1.Consistency_FullyConsistent{FullyConsistent: true}},
+			Permission:  flagSet.Lookup("permission").Value.String(),
+			Resource: &v1.ObjectReference{
+				ObjectId:   flagSet.Lookup("resource-id").Value.String(),
+				ObjectType: flagSet.Lookup("resource-type").Value.String(),
 			},
-		},
-	})
-	if err != nil {
-		return pam.ErrorPermissionDenied
+			Subject: &v1.SubjectReference{
+				Object: &v1.ObjectReference{
+					ObjectId:   id,
+					ObjectType: flagSet.Lookup("subject-type").Value.String(),
+				},
+			},
+		})
+		if err != nil {
+			return pam.ErrorService
+		}
+		if err := response.Validate(); err == nil && response.Permissionship == v1.CheckPermissionResponse_PERMISSIONSHIP_HAS_PERMISSION {
+			return nil
+		}
 	}
-	if err := response.Validate(); err != nil {
-		return pam.ErrorPermissionDenied
-	}
-	return nil
+	return pam.ErrorAuth
 }
 
 // OpenSession is ignored.
