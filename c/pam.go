@@ -10,6 +10,7 @@ import (
 
 /*
 #cgo LDFLAGS: -lpam
+#include <security/pam_appl.h>
 #include <security/pam_modules.h>
 #include <stdlib.h>
 typedef const char cchar_t;
