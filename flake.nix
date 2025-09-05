@@ -1,5 +1,5 @@
 {
-  description = "nichts - configuration for machines!";
+  description = "PAM bindings for writing service modules in Golang";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
