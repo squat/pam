@@ -28,6 +28,40 @@
           config,
           ...
         }:
+        let
+          buildGoPAMModule =
+            { pname, ... }@args:
+            pkgs.buildGoModule (
+              args
+              // {
+                env.CGO_CFLAGS = "-I${pkgs.pam}/include";
+
+                buildPhase = ''
+                  runHook preBuild
+
+                  if [ -z "$enableParallelBuilding" ]; then
+                      export NIX_BUILD_CORES=1
+                  fi
+
+                  go build '-ldflags=-buildid= -extldflags="-L${pkgs.pam}/lib"' -buildmode=c-shared -o ${pname}.so -p "$NIX_BUILD_CORES" .
+                  go build '-ldflags=-buildid= -extldflags="-L${pkgs.pam}/lib"' -o ${pname}-helper -p "$NIX_BUILD_CORES" .
+                  chmod +x ${pname}.so
+                  runHook postBuild
+                '';
+
+                installPhase = ''
+                  runHook preInstall
+
+                  mkdir -p $out/lib/security
+                  mkdir -p $out/bin
+                  cp ${pname}.so $out/lib/security
+                  cp ${pname}-helper $out/bin
+
+                  runHook postInstall
+                '';
+              }
+            );
+        in
         {
           _module.args.pkgs = import inputs.nixpkgs {
             inherit system;
@@ -38,6 +72,35 @@
             ];
             config = { };
           };
+
+          packages = {
+            pam_spicedb = buildGoPAMModule {
+              pname = "pam_spicedb";
+              version = "0.0.1";
+              src = ./examples/pam_spicedb;
+              vendorHash = null;
+
+              meta = {
+                description = "pam_spicedb.so is a PAM module that validates a user's account by checking a permission in SpiceDB.";
+                mainProgram = "lib/security/pam_spicedb.so";
+                homepage = "https://github.com/squat/pam";
+              };
+            };
+
+            pam_print = buildGoPAMModule {
+              pname = "pam_print";
+              version = "0.0.1";
+              src = ./examples/pam_print;
+              vendorHash = null;
+
+              meta = {
+                description = "pam_print.so is a PAM module that prints the user, flags, arguments, and environment variables provided to the module.";
+                mainProgram = "lib/security/pam_print.so";
+                homepage = "https://github.com/squat/pam";
+              };
+            };
+          };
+
           pre-commit = {
             check.enable = true;
             settings = {
@@ -46,11 +109,14 @@
                 actionlint.enable = true;
                 nixfmt-rfc-style.enable = true;
                 gofmt.enable = true;
+                gofmt.excludes = [ "examples/pam_.*/vendor" ];
                 govet.enable = true;
+                govet.excludes = [ "examples/pam_.*/vendor" ];
                 govet.extraPackages = [ pkgs.pam ];
               };
             };
           };
+
           devShells = {
             default = pkgs.mkShell {
               inherit (config.pre-commit.devShell) shellHook;
