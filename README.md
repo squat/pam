@@ -1,6 +1,7 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/squat/pam.svg)](https://pkg.go.dev/github.com/squat/pam)
 [![Go Report Card](https://goreportcard.com/badge/github.com/squat/pam)](https://goreportcard.com/report/github.com/squat/pam)
 [![Build Status](https://github.com/squat/pam/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/squat/pam/actions/workflows/ci.yaml)
+[![Built with Nix](https://img.shields.io/static/v1?logo=nixos&logoColor=white&label=&message=Built%20with%20Nix&color=41439a)](https://builtwithnix.org)
 
 # PAM
 
