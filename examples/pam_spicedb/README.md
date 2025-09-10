@@ -4,7 +4,8 @@
 
 ## Usage
 
-```
+[embedmd]:# (help.txt)
+```txt
 Usage of pam_spicedb:
   -endpoint string
     	The SpiceDB URL

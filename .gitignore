@@ -2,3 +2,4 @@
 *.so
 /.pre-commit-config.yaml
 /result*
+help.txt

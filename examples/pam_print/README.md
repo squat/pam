@@ -5,7 +5,8 @@ The `--output` flag can be provided in the service configuration file to specify
 
 ## Usage
 
-```
+[embedmd]:# (help.txt)
+```txt
 Usage of pam_print:
   -output string
     	The desired output format; one of "text" or "json" (default "text")
