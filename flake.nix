@@ -113,6 +113,27 @@
                 govet.enable = true;
                 govet.excludes = [ "examples/pam_.*/vendor" ];
                 govet.extraPackages = [ pkgs.pam ];
+                readme = {
+                  enable = true;
+                  name = "README.md";
+                  entry =
+                    let
+                      readmeCheck = pkgs.writeShellApplication {
+                        name = "readme-check";
+                        text = ''
+                          for f in "$@"; do
+                              if ! grep -q embedmd "$f"; then continue; fi
+                              (cd "$(dirname "$f")" && go run ./... --help 2>help.txt)
+                              go tool embedmd -d "$f"
+                          done
+                        '';
+                      };
+                    in
+                    pkgs.lib.getExe readmeCheck;
+                  files = "README\\.md$";
+                  extraPackages = [ pkgs.go ];
+                  excludes = [ "examples/pam_.*/vendor" ];
+                };
               };
             };
           };
