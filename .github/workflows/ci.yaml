@@ -9,7 +9,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: DeterminateSystems/nix-installer-action@v20
       - uses: DeterminateSystems/flakehub-cache-action@v2
       - run: nix build .#pam_spicedb .#pam_print
@@ -17,7 +17,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: DeterminateSystems/nix-installer-action@v20
         env:
           NIX_INSTALLER_EXTRA_CONF: sandbox = false
