@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: DeterminateSystems/nix-installer-action@v20
-      - uses: DeterminateSystems/flakehub-cache-action@v2
+      - uses: DeterminateSystems/flakehub-cache-action@v3
       - run: nix build .#pam_spicedb .#pam_print
 
   lint:
@@ -21,5 +21,5 @@ jobs:
       - uses: DeterminateSystems/nix-installer-action@v20
         env:
           NIX_INSTALLER_EXTRA_CONF: sandbox = false
-      - uses: DeterminateSystems/flakehub-cache-action@v2
+      - uses: DeterminateSystems/flakehub-cache-action@v3
       - run: nix flake check -L --show-trace
